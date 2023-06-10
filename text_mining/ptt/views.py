@@ -16,12 +16,7 @@ from six import u
 from django.http import JsonResponse
 from django.shortcuts import render
 
-# starttdate=datetime.datetime.strptime('12/05/22 00:00:00',"%m/%d/%y %H:%M:%S")s
-# starttdate=datetime.datetime.now()
-# adddhour=datetime.timedelta(hours=8)
-# deltime=datetime.timedelta(minutes=40)
-# starttdate=starttdate+adddhour-deltime
-# 10:05 9:59 9:48
+
 def analyzedata():
     Now_time = datetime.datetime.now().replace(microsecond=0)
     pass_time = Now_time - datetime.timedelta(minutes=6)
@@ -52,7 +47,7 @@ def analyzedata():
     for txt in data:
         tr4w = TextRank4Keyword()
         datanumcount=datanumcount+1
-        tr4w.analyze(text=str(txt), lower=True, window=2)  # py2中text必须是utf8编码的str或者unicode对象，py3中必须是utf8编码的bytes或者str对象
+        tr4w.analyze(text=str(txt), lower=True, window=2)
         count=0
         for item in tr4w.get_keywords(20, word_min_len=1):
             if(len(item.word) > 1):
