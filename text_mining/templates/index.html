@@ -1,0 +1,114 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>PTT johnny</title>
+    <script
+      src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+      integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+      crossorigin="anonymous"
+    ></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-cloud/1.2.5/d3.layout.cloud.min.js"></script>
+  </head>
+  <body>
+    <button
+      id="btn_rundata"
+      onclick="clickrundata()"
+      style="width: 20%; height: 10%"
+    >
+      rundata
+    </button>
+    <div
+      id="tag"
+      style="
+        position: relative;
+        height: 800px;
+        width: 800px;
+        left: 30%;
+        top: 15%;
+      "
+    ></div>
+    <script>
+      var data = {{data|safe}}
+      cloudset(data)
+      function clickrundata(){
+          $.ajax({
+              url:"/crawler/",
+              method:'GET',
+              success:function successfunction(msg){
+                  console.log("success_rundata")
+              }
+          })
+      }
+
+      $(document).ready(function() {
+          setTimeout(() => {
+              setInterval(function () {
+                  var post_data = {
+                      "csrfmiddlewaretoken" : '{{ csrf_token }}',
+                  }
+                  $.ajax({
+                      url:"/getdata/",
+                      method:'POST',
+                      data:post_data,
+                      success:function successfunction(msg){
+                          cloudset(msg.data)
+                      }
+                  });
+              }, 60000);
+          }, "60000")
+      })
+
+      function cloudset(data){
+          var w = parseInt(d3.select("#tag").style("width"), 10);
+          var h = parseInt(d3.select("#tag").style("height"), 10);
+          d3.layout.cloud().size([w, h])
+              .words(data)
+              .padding(2)
+              .rotate(function () {
+                  return ~~(Math.random() * 2) * 90;
+              })
+              .rotate(function () {
+                  return 0;
+              })
+              .fontSize(function (d) {
+                  return d.size;
+              })
+              .on("end", draw)
+              .start();
+      }
+      function draw(words) {
+          d3.select("#tag").selectAll("svg").remove();
+          var fill = d3.scaleOrdinal(d3.schemeCategory10);
+          var w = parseInt(d3.select("#tag").style("width"), 10);
+          var h = parseInt(d3.select("#tag").style("height"), 10);
+          d3.select("#tag").append("svg")
+                  .attr("width", w)
+                  .attr("height", h)
+                  .append("g")
+                  .attr("transform", "translate(" + w / 2 + "," + h / 2 + ")")
+                  .selectAll("text")
+                  .data(words)
+                  .enter().append("text")
+                  .style("font-size", function (d) {
+                      return d.size + "px";
+                  })
+                  .style("font-family", "Microsoft JhengHei")
+                  .style("cursor", 'pointer')
+                  .style("fill", function (d, i) {
+                      return fill(i);
+                  })
+                  .attr("text-anchor", "middle")
+                  .attr("transform", function (d) {
+                      return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
+                  })
+                  .text(function (d) {
+                      return d.text;
+                  });
+      }
+    </script>
+  </body>
+</html>
