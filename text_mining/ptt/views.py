@@ -15,39 +15,17 @@ from bs4 import BeautifulSoup
 from six import u
 from django.http import JsonResponse
 from django.shortcuts import render
-
+from PttCrawlerWordCloud.models import PTT,Keywords
 
 def analyzedata():
-    Now_time = datetime.datetime.now().replace(microsecond=0)
-    pass_time = Now_time - datetime.timedelta(minutes=6)
-
-    start_time = Now_time
-    print("當前時間 : {}".format(Now_time))
-    print("時間區間 : {} - {}".format(pass_time, Now_time))
-    
-    
-    mysql_connectdata = {
-    "host":"127.0.0.1",
-    "port":3306,
-    "user":"johnny",
-    "password":"123456",
-    "db":"text_mining",
-    "charset":"utf8"
-    }
-    
-    conn = pymysql.connect(**mysql_connectdata)
-    sqlcursor = conn.cursor()
-    
-    sqlcursor.execute("SELECT content FROM PTT WHERE `date` >= '{}' and `date` <= '{}'".format(pass_time, Now_time))
-    
-    data = sqlcursor.fetchall()
+    data = PTT.objects.filter(id__gte="0",id__lte="7")
     datanumcount=0
 
     turnbackdata = []
     for txt in data:
         tr4w = TextRank4Keyword()
         datanumcount=datanumcount+1
-        tr4w.analyze(text=str(txt), lower=True, window=2)
+        tr4w.analyze(text=str(txt.content), lower=True, window=2)
         count=0
         for item in tr4w.get_keywords(20, word_min_len=1):
             if(len(item.word) > 1):
@@ -56,10 +34,8 @@ def analyzedata():
             count=count+1							#資料長度不管有沒有大於一都COUNT+1
             if(count==5):
                 break
-        print(str(len(data))+"/"+str(datanumcount))
+        # print(str(len(data))+"/"+str(datanumcount))
     
-    end_time=datetime.datetime.now().replace(microsecond=0)
-    print("耗時 : {}".format(end_time-start_time))
     return turnbackdata
 
 def runptt():
