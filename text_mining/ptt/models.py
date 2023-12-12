@@ -18,3 +18,18 @@ class PTT(models.Model):
 
     class Meta:
         db_table = 'PTT'
+
+class Config(models.Model):
+    name = models.CharField(db_column = 'name', unique = True, max_length = 16)
+    value = models.CharField(db_column = 'value', unique = True, max_length = 10)
+
+    class Meta:
+        db_table = 'config'
+
+class Keywords(models.Model):
+    group = models.IntegerField(db_column = 'group',unique = False, default = 0)
+    text = models.CharField(db_column = 'text',unique = False, max_length = 32)
+    size = models.IntegerField(db_column = 'size',unique = False, default = 0)
+
+    class Meta:
+        db_table = 'Keywords'
